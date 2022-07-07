@@ -4,6 +4,7 @@ variable "avail_zone" {}
 variable "env_prefix" {}
 variable "my_ip_addr" {}
 variable "instance_type" {}
+variable "public_key_location" {}
 
 provider "aws" {
   region = "eu-central-1"
@@ -141,6 +142,16 @@ output "AMI-ID" {
   value = data.aws_ami.latest-amazon-ami.id
 }
 
+output "Instance-PublicIp" {
+  value = aws_instance.terra-instance.public_ip
+}
+
+
+resource "aws_key_pair" "terra-ssh-key" {
+  key_name = "terra-aws-FF"
+  public_key = "${file(var.public_key_location)}"
+}
+
 resource "aws_instance" "terra-instance" {
   ami = data.aws_ami.latest-amazon-ami.id
   instance_type = var.instance_type
@@ -148,7 +159,7 @@ resource "aws_instance" "terra-instance" {
   vpc_security_group_ids = [aws_default_security_group.terra-default-sg.id]
   availability_zone = var.avail_zone
   associate_public_ip_address = true
-  key_name = "aws-FF" 
+  key_name = aws_key_pair.terra-ssh-key.key_name
   tags = {
         Name = "${var.env_prefix}-server"
           }
