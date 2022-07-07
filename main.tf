@@ -6,6 +6,8 @@ variable "my_ip_addr" {}
 variable "instance_type" {}
 variable "public_key_location" {}
 
+
+
 provider "aws" {
   region = "eu-central-1"
 }
@@ -149,7 +151,7 @@ output "Instance-PublicIp" {
 
 resource "aws_key_pair" "terra-ssh-key" {
   key_name = "terra-aws-FF"
-  public_key = "${file(var.public_key_location)}"
+  public_key = file(var.public_key_location)
 }
 
 resource "aws_instance" "terra-instance" {
@@ -160,6 +162,7 @@ resource "aws_instance" "terra-instance" {
   availability_zone = var.avail_zone
   associate_public_ip_address = true
   key_name = aws_key_pair.terra-ssh-key.key_name
+  user_data = file("user_data.sh")
   tags = {
         Name = "${var.env_prefix}-server"
           }
