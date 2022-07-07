@@ -24,7 +24,7 @@ resource "aws_subnet" "terra-subnet-1" {
 }
 
 
-resource "aws_route_table" "terra-rtb" {
+/*resource "aws_route_table" "terra-rtb" {
   vpc_id = aws_vpc.terra-vpc.id
   route {
     cidr_block = "0.0.0.0/0"
@@ -33,8 +33,19 @@ resource "aws_route_table" "terra-rtb" {
   tags = {
         Name = "${var.env_prefix}-rtb"
           }
-}
+}*/
 
+
+resource "aws_default_route_table" "terra-main-trb" {
+  default_route_table_id = aws_vpc.terra-vpc.default_route_table_id 
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.terra-igw.id
+  }
+  tags = {
+        Name = "${var.env_prefix}-main-rtb"
+          }
+}
 
 resource "aws_internet_gateway" "terra-igw" {
  vpc_id = aws_vpc.terra-vpc.id
@@ -45,7 +56,7 @@ resource "aws_internet_gateway" "terra-igw" {
 
 
 
-resource "aws_route_table_association" "as-rtb-subnet1" {
+/*resource "aws_route_table_association" "as-rtb-subnet1" {
   subnet_id = aws_subnet.terra-subnet-1.id
   route_table_id = aws_route_table.terra-rtb.id
-}
+}*/
