@@ -3,6 +3,7 @@ variable "subnet_cidr_block" {}
 variable "avail_zone" {}
 variable "env_prefix" {}
 variable "my_ip_addr" {}
+variable "instance_type" {}
 
 provider "aws" {
   region = "eu-central-1"
@@ -115,4 +116,42 @@ resource "aws_default_security_group" "terra-default-sg" {
   tags = {
         Name = "${var.env_prefix}-default-sg"
           }
+}
+
+data "aws_ami" "latest-amazon-ami" {
+      most_recent = true
+      owners = ["amazon"]
+       filter {
+         name   = "name"
+         values = ["amzn2-ami-kernel-5.10-hvm-*-x86_64-gp2"]
+      }
+       filter {
+         name   = "root-device-type"
+         values = ["ebs"]
+      }
+       filter {
+         name   = "virtualization-type"
+         values = ["hvm"]
+      }
+
+}
+
+
+output "AMI-ID" {
+  value = data.aws_ami.latest-amazon-ami.id
+}
+
+resource "aws_instance" "terra-instance" {
+  ami = data.aws_ami.latest-amazon-ami.id
+  instance_type = var.instance_type
+  subnet_id = aws_subnet.terra-subnet-1.id
+  vpc_security_group_ids = [aws_default_security_group.terra-default-sg.id]
+  availability_zone = var.avail_zone
+  associate_public_ip_address = true
+  key_name = "aws-FF" 
+  tags = {
+        Name = "${var.env_prefix}-server"
+          }
+
+
 }
